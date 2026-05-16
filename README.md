@@ -28,6 +28,7 @@ Back-End: **Python 3**
 Tecnologia de front-end que o grupo pretende utilizar
 
 ## Estrutura do Projeto
+```
 meu-projeto-carrinho/
 │
 ├── backend/                  # BACK-END: Python + API FastAPI
@@ -59,3 +60,4 @@ meu-projeto-carrinho/
 │
 ├── .gitignore                # Configurado para ignorar venv/ e node_modules/
 └── README.md                 # Guia Geral explicando o projeto e como rodar ambos
+```
