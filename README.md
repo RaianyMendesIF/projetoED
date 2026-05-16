@@ -23,9 +23,8 @@ _A definir em aula:_
 - Localização rápida de produto por código (tabela hash)
 
 ## Tecnologia
-Front-End: **React**
-Back-End: **Python 3**
-Tecnologia de front-end que o grupo pretende utilizar
+- Front-End: **React**
+- Back-End: **Python 3**
 
 ## Estrutura do Projeto
 ```
