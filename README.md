@@ -5,22 +5,21 @@ Raiany Vitoria Prado Mendes <br>
 Sara Oliveira Mendes <br>
 Yasmin Hester Pereira da Silva <br>
 
-## Projeto 02 — Carrinho de compras
-Sistema que simula um carrinho de compras de uma loja virtual. O backend deve ser inteiramente em Python.
+## Projeto 03 — Sistema de atendimento (fila de espera)
+Simulação de um sistema de atendimento com fila de espera, como em uma clínica ou banco.
 
 _Requisitos funcionais:_
-- Cadastrar produto com nome, preço e quantidade em estoque
-- Adicionar produto ao carrinho com quantidade desejada
-- Remover produto do carrinho
-- Desfazer a última ação no carrinho (usando pilha)
-- Exibir resumo do carrinho com total atualizado
-- Finalizar compra e atualizar estoque
-- Exibir histórico de compras realizadas (usando lista encadeada)
-
+- Cadastrar cliente com nome e tipo de atendimento (normal ou preferencial)
+- Adicionar cliente à fila de espera
+- Chamar próximo cliente respeitando a prioridade (preferencial à frente)
+- Exibir status atual da fila (posição de cada cliente)
+- Registrar atendimentos concluídos em uma lista de histórico
+- Cancelar atendimento e remover cliente da fila
+  
 _A definir em aula:_
-- Ordenar produtos por nome ou preço
-- Buscar produto por nome ou categoria
-- Localização rápida de produto por código (tabela hash)
+- Ordenar histórico de atendimentos por data e hora
+- Buscar cliente no histórico por nome
+- Localização rápida de cliente por número de senha (tabela hash)
 
 ## Tecnologia
 - Front-End: **React**
