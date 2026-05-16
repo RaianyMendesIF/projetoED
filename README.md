@@ -1,9 +1,9 @@
 # Projeto de Estrutura de Dados
 
 ## Integrantes:
-Raiany Vitoria Prado Mendes
-Sara Oliveira Mendes
-Yasmin Hester Pereira da Silva
+Raiany Vitoria Prado Mendes <br>
+Sara Oliveira Mendes <br>
+Yasmin Hester Pereira da Silva <br>
 
 ## Projeto 02 — Carrinho de compras
 Sistema que simula um carrinho de compras de uma loja virtual. O backend deve ser inteiramente em Python.
