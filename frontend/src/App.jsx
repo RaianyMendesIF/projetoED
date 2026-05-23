@@ -1,93 +1,83 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 
 export default function App() {
-  // Estados principais
   const [fila, setFila] = useState([]);
   const [historico, setHistorico] = useState([]);
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState('Normal');
   const [proximaSenha, setProximaSenha] = useState(1);
   
-  // Estados de busca e filtro
   const [buscaNome, setBuscaNome] = useState('');
   const [buscaSenha, setBuscaSenha] = useState('');
   const [resultadoSenha, setResultadoSenha] = useState(null);
   const [ordemHistorico, setOrdemHistorico] = useState('recente');
 
-  // --- TABELA HASH (O(1)) ---
-  const tabelaHashSenhas = useMemo(() => {
-    const hash = {};
-    [...fila, ...historico].forEach(cliente => {
-      hash[cliente.senha] = cliente;
-    });
-    return hash;
-  }, [fila, historico]);
+  // 🔄 FUNÇÃO PARA BUSCAR DADOS ATUALIZADOS DO PYTHON
+  const carregarDadosDoServidor = async () => {
+    try {
+      const resposta = await fetch('http://localhost:5000/dados');
+      const dados = await resposta.json();
+      setFila(dados.fila);
+      setHistorico(dados.historico);
+      setProximaSenha(dados.proximaSenha);
+    } catch (erro) {
+      console.error("Erro ao conectar com o Python:", erro);
+    }
+  };
 
-  const lidarBuscaSenha = (e) => {
+  // Carrega os dados assim que a tela abre
+  useEffect(() => {
+    carregarDadosDoServidor();
+  }, []);
+
+  // 1. Cadastrar enviando para o Python
+  const adicionarCliente = async (e) => {
     e.preventDefault();
-    const senhaNum = parseInt(buscaSenha);
-    if (tabelaHashSenhas[senhaNum]) {
-      setResultadoSenha(tabelaHashSenhas[senhaNum]);
+    if (!nome.trim()) return;
+
+    await fetch('http://localhost:5000/cadastrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: nome.trim(),
+        tipo: tipo,
+        chegada: new Date().toLocaleTimeString()
+      })
+    });
+
+    setNome('');
+    carregarDadosDoServidor(); // Atualiza a tela
+  };
+
+  // 2. Chamar próximo chamando rota do Python
+  const chamarProximo = async () => {
+    await fetch('http://localhost:5000/chamar', { method: 'POST' });
+    carregarDadosDoServidor();
+  };
+
+  // 3. Cancelar chamando rota do Python
+  const cancelarAtendimento = async (id) => {
+    await fetch(`http://localhost:5000/cancelar/${id}`, { method: 'POST' });
+    carregarDadosDoServidor();
+  };
+
+  // 4. Busca por Senha O(1) direto na Tabela Hash do Python
+  const lidarBuscaSenha = async (e) => {
+    e.preventDefault();
+    if (!buscaSenha) return;
+
+    const resposta = await fetch(`http://localhost:5000/buscar-senha/${buscaSenha}`);
+    const dados = await resposta.json();
+
+    if (dados.encontrado) {
+      setResultadoSenha(dados.cliente);
     } else {
       setResultadoSenha('Não encontrado');
     }
   };
 
-  // --- REQUISITOS FUNCIONAIS ---
-  const adicionarCliente = (e) => {
-    e.preventDefault();
-    if (!nome.trim()) return;
-
-    const novoCliente = {
-      id: Math.random().toString(36).substr(2, 9),
-      nome: nome.trim(),
-      tipo,
-      senha: proximaSenha,
-      status: 'Aguardando',
-      chegada: new Date().toLocaleTimeString()
-    };
-
-    setFila(filaAtual => {
-      if (tipo === 'Preferencial') {
-        const indexUltimoPref = filaAtual.findLastIndex(c => c.tipo === 'Preferencial');
-        const novaFila = [...filaAtual];
-        novaFila.splice(indexUltimoPref + 1, 0, novoCliente);
-        return novaFila;
-      }
-      return [...filaAtual, novoCliente];
-    });
-
-    setProximaSenha(prev => prev + 1);
-    setNome('');
-  };
-
-  const chamarProximo = () => {
-    if (fila.length === 0) return;
-
-    const [proximo, ...restanteFila] = fila;
-    
-    const clienteAtendido = {
-      ...proximo,
-      status: 'Concluído',
-      conclusao: new Date().toLocaleTimeString()
-    };
-
-    setFila(restanteFila);
-    setHistorico(prev => [clienteAtendido, ...prev]);
-  };
-
-  const cancelarAtendimento = (id) => {
-    const clienteCancelado = fila.find(c => c.id === id);
-    if (!clienteCancelado) return;
-
-    setFila(prev => prev.filter(c => c.id !== id));
-    setHistorico(prev => [
-      { ...clienteCancelado, status: 'Cancelado', conclusao: new Date().toLocaleTimeString() },
-      ...prev
-    ]);
-  };
-
+  // Ordenação e filtro local apenas para exibição do Histórico
   const historicoFiltradoEOrdenado = useMemo(() => {
     let resultado = historico.filter(c => 
       c.nome.toLowerCase().includes(buscaNome.toLowerCase())

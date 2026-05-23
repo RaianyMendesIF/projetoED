@@ -1,82 +1,81 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from classes import Queue
 
 app = Flask(__name__)
 CORS(app)
 
+fila_tad = Queue()
+historico_lista = [] 
+tabela_hash_senhas = {} 
+proxima_senha = 1
 
-class Node:
-    def __init__(self, cliente):
-        self.cliente = cliente
-        self.next = None
 
+@app.route('/dados', methods=['GET'])
+def obter_dados():
+    return jsonify({
+        "fila": fila_tad.transforma_lista(),
+        "historico": historico_lista,
+        "proximaSenha": proxima_senha
+    })
 
-class Queue:
-    def __init__(self):
-        self.head = None            
-        self.tail = None  
-        self._size = 0 
-
-    # Insere na fila
-    def enqueue(self, novo_cliente):
-            node = Node(novo_cliente)
-            
-            if self.head is None:           
-                self.tail = node            
-                self.head = node 
-
-            if novo_cliente['prioridade'] == "Preferencial" and self.head.cliente['prioridade'] == "Normal":
-                self.head.next = self.head   
-                self.head = node  
-
-            pointer = self.head
-            if novo_cliente['prioridade'] == "Preferencial":
-                while pointer.next is not None and pointer.next.cliente['prioridade'] == "Preferencial":
-                    pointer = pointer.next
-                node.next = pointer.next
-                pointer.next = node
-            else:
-                self.tail.next = node
-                self.tail = node
-
-            self._size = self._size + 1
-
-    # Remove da fila
-    def dequeue(self):
-        if self._size > 0:
-            cliente  = self.head.cliente
-            self.head = self.head.next
+@app.route('/cadastrar', methods=['POST'])
+def cadastrar():
+    global proxima_senha
+    dados = request.json
     
-            if self.head is None:
-                self.tail = None
-
-            self._size -= 1
-            return cliente
-        return None
-
-        # Remove da fila pela senha
+    novo_cliente = {
+        "id": str(proxima_senha) + "id",
+        "nome": dados['nome'],
+        "prioridade": dados['prioridade'],
+        "senha": proxima_senha,
+        "status": "Aguardando",
+        "chegada": dados['chegada']
+    }
     
-    # Remove da fila pelo id
-    def dequeue_for_id(self, cliente_id):
-        pointer = self.head
-        prev = None
+    fila_tad.enqueue(novo_cliente)
+    
+    tabela_hash_senhas[proxima_senha] = novo_cliente
+    
+    proxima_senha += 1
+    return jsonify({"sucesso": True})
 
-        while pointer is not None:
-            if pointer.cliente['id'] == cliente_id:
-                if prev is None:
-                    self.head = pointer.next
-                else:
-                    prev.next = poiter.next
-                return pointer.cliente
-            prev = pointer
-            pointer = pointer.next
-        return None
 
-    # Transforma em lista para enviar ao React
-    def transforma_lista(self):
-        pointer = self.head
-        while pointer is not None:
-            lista.append(pointer.cliente)
-            pointer = pointer.next
-        return lista
+@app.route('/chamar', methods=['POST'])
+def chamar():
+
+    cliente = fila_tad.dequeue()
+    if cliente:
+        import datetime
+        cliente['status'] = 'Concluído'
+        cliente['conclusao'] = datetime.datetime.now().strftime("%H:%M:%S")
+        
+        tabela_hash_senhas[cliente['senha']] = cliente
+        historico_lista.insert(0, cliente)
+        
+    return jsonify({"sucesso": True})
+
+@app.route('/cancelar/<cliente_id>', methods=['POST'])
+def cancelar(cliente_id):
+ 
+    cliente = fila_tad.dequeue_for_id(cliente_id)
+    if cliente:
+        import datetime
+        cliente['status'] = 'Cancelado'
+        cliente['conclusao'] = datetime.datetime.now().strftime("%H:%M:%S")
+        
+        tabela_hash_senhas[cliente['senha']] = cliente
+        historico_lista.insert(0, cliente)
+        
+    return jsonify({"sucesso": True})
+
+@app.route('/buscar-senha/<int:senha>', methods=['GET'])
+def buscar_senha(senha):
+    cliente = tabela_hash_senhas.get(senha)
+    if cliente:
+        return jsonify({"encontrado": True, "cliente": cliente})
+    return jsonify({"encontrado": False})
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
  
