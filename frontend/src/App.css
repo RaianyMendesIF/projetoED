@@ -1,0 +1,332 @@
+/* Variáveis de estilo e paleta de cores moderna */
+:root {
+  --bg-page: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --success: #22c55e;
+  --success-bg: #dcfce7;
+  --border: #e2e8f0;
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  padding: 24px;
+}
+
+.container-painel {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ESTRUTURA EM 3 COLUNAS COM PROPORÇÃO DE LARGURA */
+.grid-tres-colunas {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1fr; /* Coluna 2 é 60% maior */
+  gap: 24px;
+  align-items: start;
+}
+
+/* Flexbox para empilhar componentes nas colunas laterais */
+.coluna-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.coluna-central {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* CARD PADRÃO */
+.card {
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* COMPONENTE: HEADER ATENDFÁCIL (LINHA 1 DA COLUNA 2) */
+.header-operacional {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+}
+
+.logo-painel {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1e1b4b;
+  letter-spacing: -0.5px;
+}
+
+.botao-chamar {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.botao-chamar:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.botao-chamar:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* FORMULÁRIO DE CADASTRO */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.label-campo {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.input-texto {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #f8fafc;
+}
+
+.input-texto:focus {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.botoes-tipo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.botao-opcao {
+  padding: 10px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.botao-opcao.ativo {
+  border-color: var(--primary);
+  background: #e0e7ff;
+  color: var(--primary);
+}
+
+.botao-submit {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botao-submit:hover { background: #1e293b; }
+
+/* SEÇÃO DE BUSCA POR SENHA (HASH) */
+.subtexto {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.form-busca {
+  display: flex;
+  gap: 8px;
+}
+
+.botao-busca {
+  background: #e2e8f0;
+  border: none;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #334155;
+}
+
+.resultado-hash {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.resultado-nome { font-weight: 700; color: #1e293b; }
+
+/* LISTAS DE ATENDIMENTO (FILA E HISTÓRICO) */
+.topo-fila, .topo-historico {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.badge-contador {
+  background: #e0e7ff;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.select-filtro {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  background: #f8fafc;
+}
+
+.busca-historico { margin-bottom: 16px; }
+
+/* SCROLL CONFIGURATIONS */
+.lista-scroll {
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.scroll-fila { height: 520px; } /* Deixa a lista central comprida */
+.scroll-historico { height: 574px; }
+
+.item-lista {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+  margin-bottom: 10px;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.posicao-numero {
+  width: 36px;
+  height: 36px;
+  background: #cbd5e1;
+  color: #334155;
+  font-weight: 800;
+  font-size: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cliente-nome { font-size: 15px; font-weight: 600; }
+
+.tags-container {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.tag-senha { background: #e2e8f0; color: #475569; }
+.tag-prioridade.normal { background: #dbeafe; color: #1e40af; }
+.tag-prioridade.preferencial { background: #fef3c7; color: #92400e; }
+
+.botao-cancelar {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.botao-cancelar:hover { background: var(--danger-bg); }
+
+/* ESTILOS DO HISTÓRICO */
+.historico-nome { font-size: 14px; font-weight: 600; }
+.historico-detalhes { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.badge-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.status-concluído { background: var(--success-bg); color: var(--success); }
+.status-cancelado { background: var(--danger-bg); color: var(--danger); }
+.status-aguardando { background: #fef3c7; color: #d97706; }
+
+.texto-vazio {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.texto-erro { color: var(--danger); font-weight: 600; }
+
+/* RESPONSIVIDADE (Para telas menores/tablets) */
+@media (max-width: 1024px) {
+  .grid-tres-colunas {
+    grid-template-columns: 1fr;
+  }
+}
