@@ -29,18 +29,11 @@ _A definir em aula:_
 ```
 meu-projeto-carrinho/
 │
-├── backend/                  # BACK-END: Python + API FastAPI
+├── backend/                  # BACK-END: Python
 │   ├── app/
 │   │   ├── main.py           # Inicialização da API e definição das Rotas
 │   │   │
-│   │   ├── tads/             
-│   │   │   └── carrinho.py   # Lógica do carrinho usando o seu TAD
-│   │   │
-│   │   └── schemas.py        # Validação de dados (Pydantic) para as rotas
-│   │
-│   ├── venv/                 # Ambiente virtual do Python
-│   ├── requirements.txt      # Arquivo com as dependências (fastapi, uvicorn)
-│   └── README.md             # Como rodar o back-end
+│   │   └── classes.py        # Classes de Fila criadas
 │
 ├── frontend/                 
 │   ├── node_modules/         # Dependências do Node (NÃO enviar para o Git)
@@ -52,6 +45,7 @@ meu-projeto-carrinho/
 │   │   │   └── api.js
 │   │   ├── App.jsx           # Componente principal que gerencia o estado da tela
 │   │   └── main.jsx          # Ponto de entrada do React
+│   │   └── App.cs            # Estilos da página principal
 │   │
 │   ├── package.json          # Dependências e scripts do React
 │   └── README.md             # Como rodar o front-end
