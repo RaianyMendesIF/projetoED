@@ -5,7 +5,7 @@ export default function App() {
   const [fila, setFila] = useState([]);
   const [historico, setHistorico] = useState([]);
   const [nome, setNome] = useState('');
-  const [tipo, setTipo] = useState('Normal');
+  const [prioridade, setprioridade] = useState('Normal');
   const [proximaSenha, setProximaSenha] = useState(1);
   
   const [buscaNome, setBuscaNome] = useState('');
@@ -13,71 +13,81 @@ export default function App() {
   const [resultadoSenha, setResultadoSenha] = useState(null);
   const [ordemHistorico, setOrdemHistorico] = useState('recente');
 
-  // 🔄 FUNÇÃO PARA BUSCAR DADOS ATUALIZADOS DO PYTHON
+  // BUSCA DADOS DO PYTHON
   const carregarDadosDoServidor = async () => {
     try {
       const resposta = await fetch('http://localhost:5000/dados');
+      if (!resposta.ok) throw new Error('Erro no servidor');
       const dados = await resposta.json();
-      setFila(dados.fila);
-      setHistorico(dados.historico);
-      setProximaSenha(dados.proximaSenha);
+      
+      setFila(dados.fila || []);
+      setHistorico(dados.historico || []);
+      setProximaSenha(dados.proximaSenha || 1);
     } catch (erro) {
       console.error("Erro ao conectar com o Python:", erro);
     }
   };
 
-  // Carrega os dados assim que a tela abre
   useEffect(() => {
     carregarDadosDoServidor();
   }, []);
 
-  // 1. Cadastrar enviando para o Python
+
   const adicionarCliente = async (e) => {
     e.preventDefault();
     if (!nome.trim()) return;
 
-    await fetch('http://localhost:5000/cadastrar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nome: nome.trim(),
-        tipo: tipo,
-        chegada: new Date().toLocaleTimeString()
-      })
-    });
-
-    setNome('');
-    carregarDadosDoServidor(); // Atualiza a tela
-  };
-
-  // 2. Chamar próximo chamando rota do Python
-  const chamarProximo = async () => {
-    await fetch('http://localhost:5000/chamar', { method: 'POST' });
-    carregarDadosDoServidor();
-  };
-
-  // 3. Cancelar chamando rota do Python
-  const cancelarAtendimento = async (id) => {
-    await fetch(`http://localhost:5000/cancelar/${id}`, { method: 'POST' });
-    carregarDadosDoServidor();
-  };
-
-  // 4. Busca por Senha O(1) direto na Tabela Hash do Python
-  const lidarBuscaSenha = async (e) => {
-    e.preventDefault();
-    if (!buscaSenha) return;
-
-    const resposta = await fetch(`http://localhost:5000/buscar-senha/${buscaSenha}`);
-    const dados = await resposta.json();
-
-    if (dados.encontrado) {
-      setResultadoSenha(dados.cliente);
-    } else {
-      setResultadoSenha('Não encontrado');
+    try {
+      await fetch('http://localhost:5000/cadastrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: nome.trim(),
+          tipo: prioridade, // Traduz 'prioridade' do front para 'tipo' do back
+          chegada: new Date().toLocaleTimeString()
+        })
+      });
+      setNome('');
+      await carregarDadosDoServidor(); 
+    } catch (erro) {
+      print("Erro ao cadastrar:", erro);
     }
   };
 
-  // Ordenação e filtro local apenas para exibição do Histórico
+
+  const chamarProximo = async () => {
+    try {
+      await fetch('http://localhost:5000/chamar', { method: 'POST' });
+      await carregarDadosDoServidor();
+    } catch (erro) {
+      console.error(erro);
+    }
+  };
+
+
+  const cancelarAtendimento = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/cancelar/${id}`, { method: 'POST' });
+      await carregarDadosDoServidor();
+    } catch (erro) {
+      console.error(erro);
+    }
+  };
+
+
+  const lidarBuscaSenha = async (e) => {
+    e.preventDefault();
+    if (!buscaSenha) return;
+    try {
+      const resposta = await fetch(`http://localhost:5000/buscar-senha/${buscaSenha}`);
+      const dados = await resposta.json();
+      setResultadoSenha(dados.encontrado ? dados.cliente : 'Não encontrado');
+    } catch (erro) {
+      setResultadoSenha('Erro na busca');
+    }
+  };
+
+
   const historicoFiltradoEOrdenado = useMemo(() => {
     let resultado = historico.filter(c => 
       c.nome.toLowerCase().includes(buscaNome.toLowerCase())
@@ -91,9 +101,8 @@ export default function App() {
     <div className="container-painel">
       <main className="grid-tres-colunas">
         
-        {/* COLUNA 1 (ESQUERDA - MAIS ESTREITA) */}
+ 
         <div className="coluna-lateral">
-          {/* Cadastro */}
           <section className="card">
             <h2 className="titulo-secao">👤 Novo Atendimento</h2>
             <form onSubmit={adicionarCliente} className="formulario">
@@ -109,13 +118,13 @@ export default function App() {
               </div>
               <div className="campo">
                 <label className="label-campo">Tipo de Prioridade</label>
-                <div className="botoes-tipo">
+                <div className="botoes-prioridade">
                   {['Normal', 'Preferencial'].map((t) => (
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setTipo(t)}
-                      className={`botao-opcao ${tipo === t ? 'ativo' : ''}`}
+                      onClick={() => setprioridade(t)}
+                      className={`botao-opcao ${prioridade === t ? 'ativo' : ''}`}
                     >
                       {t}
                     </button>
@@ -128,10 +137,9 @@ export default function App() {
             </form>
           </section>
 
-          {/* Localização Rápida */}
           <section className="card">
             <h2 className="titulo-secao">🔍 Localização Rápida</h2>
-            <p className="subtexto">Busca instantânea $O(1)$ via Tabela Hash.</p>
+            <p className="subtexto">Busca instantânea O(1) via Tabela Hash.</p>
             <form onSubmit={lidarBuscaSenha} className="form-busca">
               <input 
                 type="number" 
@@ -150,8 +158,8 @@ export default function App() {
                 ) : (
                   <div>
                     <p className="resultado-nome">{resultadoSenha.nome}</p>
-                    <p className="resultado-status">Status: <span className={`status-${resultadoSenha.status.toLowerCase()}`}>{resultadoSenha.status}</span></p>
-                    <p className="resultado-tipo">Tipo: {resultadoSenha.tipo}</p>
+                    <p className="resultado-status">Status: <span>{resultadoSenha.status}</span></p>
+                    <p className="resultado-prioridade">Prioridade: {resultadoSenha.tipo || resultadoSenha.prioridade}</p>
                   </div>
                 )}
               </div>
@@ -159,24 +167,18 @@ export default function App() {
           </section>
         </div>
 
-        {/* COLUNA 2 (CENTRO - MAIS COMPRIDA) */}
+        {/* COLUNA 2: FILA DE ESPERA */}
         <div className="coluna-central">
-          {/* Topo Central: AtendFácil + Chamar Próximo */}
           <header className="card header-operacional">
             <div>
               <h1 className="logo-painel">AtendFácil</h1>
               <p className="subtexto">Painel de Gerenciamento de Filas</p>
             </div>
-            <button 
-              onClick={chamarProximo}
-              disabled={fila.length === 0}
-              className="botao-chamar"
-            >
+            <button onClick={chamarProximo} disabled={fila.length === 0} className="botao-chamar">
               ▶️ Chamar Próximo
             </button>
           </header>
 
-          {/* Lista de Espera */}
           <section className="card card-fila-espera">
             <div className="topo-fila">
               <h2 className="titulo-secao">👥 Fila de Espera</h2>
@@ -195,19 +197,13 @@ export default function App() {
                         <h3 className="cliente-nome">{cliente.nome}</h3>
                         <div className="tags-container">
                           <span className="tag tag-senha">Senha {cliente.senha}</span>
-                          <span className={`tag tag-prioridade ${cliente.tipo.toLowerCase()}`}>
-                            {cliente.tipo}
+                          <span className={`tag tag-prioridade ${(cliente.prioridade || 'Normal').toLowerCase()}`}>
+                            {cliente.prioridade || 'Normal'}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => cancelarAtendimento(cliente.id)}
-                      className="botao-cancelar"
-                      title="Cancelar Atendimento"
-                    >
-                      ❌
-                    </button>
+                    <button onClick={() => cancelarAtendimento(cliente.id)} className="botao-cancelar">❌</button>
                   </div>
                 ))
               )}
@@ -215,16 +211,12 @@ export default function App() {
           </section>
         </div>
 
-        {/* COLUNA 3 (DIREITA - MESMA LARGURA DA PRIMEIRA) */}
+ 
         <div className="coluna-lateral">
           <section className="card card-historico">
             <div className="topo-historico">
               <h2 className="titulo-secao">🕒 Histórico</h2>
-              <select 
-                value={ordemHistorico} 
-                onChange={(e) => setOrdemHistorico(e.target.value)}
-                className="select-filtro"
-              >
+              <select value={ordemHistorico} onChange={(e) => setOrdemHistorico(e.target.value)} className="select-filtro">
                 <option value="recente">Mais Recentes</option>
                 <option value="antigo">Mais Antigos</option>
               </select>
@@ -248,11 +240,9 @@ export default function App() {
                   <div key={h.id} className="item-lista item-historico">
                     <div>
                       <h4 className="historico-nome">{h.nome}</h4>
-                      <p className="historico-detalhes">
-                        Senha {h.senha} • {h.conclusao}
-                      </p>
+                      <p className="historico-detalhes">Senha {h.senha} • {h.conclusao}</p>
                     </div>
-                    <span className={`badge-status status-${h.status.toLowerCase()}`}>
+                    <span className={`badge-status status-${(h.status || 'concluido').toLowerCase()}`}>
                       {h.status === 'Concluído' ? '✅' : '❌'} {h.status}
                     </span>
                   </div>

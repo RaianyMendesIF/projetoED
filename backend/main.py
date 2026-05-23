@@ -10,7 +10,6 @@ historico_lista = []
 tabela_hash_senhas = {} 
 proxima_senha = 1
 
-
 @app.route('/dados', methods=['GET'])
 def obter_dados():
     return jsonify({
@@ -18,6 +17,7 @@ def obter_dados():
         "historico": historico_lista,
         "proximaSenha": proxima_senha
     })
+
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
@@ -27,7 +27,7 @@ def cadastrar():
     novo_cliente = {
         "id": str(proxima_senha) + "id",
         "nome": dados['nome'],
-        "prioridade": dados['prioridade'],
+        "prioridade": dados['tipo'],
         "senha": proxima_senha,
         "status": "Aguardando",
         "chegada": dados['chegada']
@@ -55,6 +55,7 @@ def chamar():
         
     return jsonify({"sucesso": True})
 
+
 @app.route('/cancelar/<cliente_id>', methods=['POST'])
 def cancelar(cliente_id):
  
@@ -69,12 +70,14 @@ def cancelar(cliente_id):
         
     return jsonify({"sucesso": True})
 
+
 @app.route('/buscar-senha/<int:senha>', methods=['GET'])
 def buscar_senha(senha):
     cliente = tabela_hash_senhas.get(senha)
     if cliente:
         return jsonify({"encontrado": True, "cliente": cliente})
     return jsonify({"encontrado": False})
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
