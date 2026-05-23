@@ -10,53 +10,73 @@ class Node:
         self.cliente = cliente
         self.next = None
 
-# Estrutura básica da fila
+
 class Queue:
     def __init__(self):
         self.head = None            
         self.tail = None  
         self._size = 0 
 
-    # Insere
-    def enqueue(self, elem, time):
-            node = Node(elem, time)
-            if self.tail is None:           
+    # Insere na fila
+    def enqueue(self, novo_cliente):
+            node = Node(novo_cliente)
+            
+            if self.head is None:           
                 self.tail = node            
-                self.head = node                       
+                self.head = node 
+
+            if novo_cliente['prioridade'] == "Preferencial" and self.head.cliente['prioridade'] == "Normal":
+                self.head.next = self.head   
+                self.head = node  
+
+            pointer = self.head
+            if novo_cliente['prioridade'] == "Preferencial":
+                while pointer.next is not None and pointer.next.cliente['prioridade'] == "Preferencial":
+                    pointer = pointer.next
+                node.next = pointer.next
+                pointer.next = node
             else:
-                self.tail.next = node       
-                self.tail = node            
+                self.tail.next = node
+                self.tail = node
+
             self._size = self._size + 1
-    
-    # Remove
+
+    # Remove da fila
     def dequeue(self):
         if self._size > 0:
-            elem  = self.head.data
+            cliente  = self.head.cliente
             self.head = self.head.next
     
             if self.head is None:
                 self.tail = None
 
             self._size -= 1
-            return elem
-        raise IndexError("A fila está vazia!")
+            return cliente
+        return None
 
-
-    def show(self):
+        # Remove da fila pela senha
+    
+    # Remove da fila pelo id
+    def dequeue_for_id(self, cliente_id):
         pointer = self.head
-        while pointer:
-            print(f"({pointer.data} - {pointer.time})")
+        prev = None
+
+        while pointer is not None:
+            if pointer.cliente['id'] == cliente_id:
+                if prev is None:
+                    self.head = pointer.next
+                else:
+                    prev.next = poiter.next
+                return pointer.cliente
+            prev = pointer
             pointer = pointer.next
+        return None
 
-
-    def quantum(self, quantum):
-        while self.head:
-            self.head.time = self.head.time - quantum
-            if self.head.time <= 0:
-                print(f"{self.head.data} removido! Tempo: {self.head.time}")
-                self.dequeue()
-            else:
-                node = self.head.data
-                time = self.head.time
-                self.dequeue()
-                self.enqueue(node, time)
+    # Transforma em lista para enviar ao React
+    def transforma_lista(self):
+        pointer = self.head
+        while pointer is not None:
+            lista.append(pointer.cliente)
+            pointer = pointer.next
+        return lista
+ 
