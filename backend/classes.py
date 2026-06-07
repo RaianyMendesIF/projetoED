@@ -10,10 +10,16 @@ class Queue:
         self.tail = None  
         self._size = 0 
 
+    def is_empty(self):
+        return self.head is None
+
+    def get_size(self):
+        return self._size
+
     def enqueue(self, novo_cliente):
         node = Node(novo_cliente)
         
-        if self.head is None:           
+        if self.is_empty():           
             self.head = node
             self.tail = node 
 
@@ -40,7 +46,7 @@ class Queue:
 
     # Remove o primeiro da fila (O(1))
     def dequeue(self):
-        if self._size > 0:
+        if not self.is_empty():
             cliente = self.head.cliente
             self.head = self.head.next
     
@@ -82,3 +88,26 @@ class Queue:
             lista.append(pointer.cliente)
             pointer = pointer.next
         return lista
+
+    # Filtra e ordena o histórico
+    def filtrar_e_ordenar_historico(self, historico, busca="", ordem="recente"):
+        busca = busca.lower()
+        resultado = historico
+        
+        if busca:
+            resultado = [c for c in historico if busca in c['nome'].lower()]
+            
+        if ordem == 'antigo':
+            return resultado[::-1]
+        return resultado
+
+    def busca_por_nome(self, nome_procurado):
+        nome_procurado = nome_procurado.strip().lower()
+        pointer = self.head
+        
+        while pointer is not None:
+            if pointer.cliente['nome'].lower() == nome_procurado:
+                return pointer.cliente 
+            pointer = pointer.next      
+            
+        return None 

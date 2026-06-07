@@ -12,9 +12,12 @@ proxima_senha = 1
 
 @app.route('/dados', methods=['GET'])
 def obter_dados():
+    busca_nome = request.args.get('busca', '').strip()
+    ordem_historico = request.args.get('ordem', 'recente')
+
     return jsonify({
         "fila": fila_tad.transforma_lista(),
-        "historico": historico_lista,
+        "historico": fila_tad.filtrar_e_ordenar_historico(historico_lista, busca_nome, ordem_historico), 
         "proximaSenha": proxima_senha
     })
 
@@ -40,6 +43,25 @@ def cadastrar():
     proxima_senha += 1
     return jsonify({"sucesso": True})
 
+@app.route('/buscar-nome', methods=['GET'])
+def buscar_nome():
+    nome_procurado = request.args.get('nome', '').strip()
+    
+    if not nome_procurado:
+        return jsonify({"encontrado": False})
+
+    cliente = fila_tad.busca_por_nome(nome_procurado)
+    
+    if not cliente:
+        for c in historico_lista:
+            if c['nome'].lower() == nome_procurado.lower():
+                cliente = c
+                break
+
+    if cliente:
+        return jsonify({"encontrado": True, "cliente": cliente})
+
+    return jsonify({"encontrado": False})
 
 @app.route('/chamar', methods=['POST'])
 def chamar():

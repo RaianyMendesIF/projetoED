@@ -285,6 +285,12 @@ body {
   text-transform: uppercase;
 }
 
+.botoes-prioridade {
+  display: flex;        
+  gap: 12px;             
+  margin-top: 8px;     
+}
+
 .tag-senha { background: #e2e8f0; color: #475569; }
 .tag-prioridade.normal { background: #dbeafe; color: #1e40af; }
 .tag-prioridade.preferencial { background: #fef3c7; color: #92400e; }

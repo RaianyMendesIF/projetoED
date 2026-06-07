@@ -50,6 +50,48 @@ meu-projeto-carrinho/
 │   ├── package.json          # Dependências e scripts do React
 │   └── README.md             # Como rodar o front-end
 │
-├── .gitignore                # Configurado para ignorar venv/ e node_modules/
 └── README.md                 # Guia Geral explicando o projeto e como rodar ambos
 ```
+
+## Executar o sistema
+
+### Back-End
+``` cd backend ``` <br>
+``` pip install -r requirements.txt``` <br>
+``` python main.py ``` <br>
+
+### Front-End
+``` cd frontend ``` <br>
+``` pip install -r requirements.txt``` <br>
+``` nmp run dev ``` <br>
+
+### Atualizar o arquivo de requerimentos
+``` pip freeze > requirements.txt``` <br>
+
+
+## ETAPA 1
+Simulação de um sistema de atendimento com fila de espera, como em uma clínica ou banco. O backend deve ser inteiramente em Python.
+
+Requisitos funcionais — anunciados agora:
+
+- Cadastrar cliente com nome e tipo de atendimento (normal ou preferencial)
+- Adicionar cliente à fila de espera
+- Chamar próximo cliente respeitando a prioridade (preferencial à frente)
+- Exibir status atual da fila (posição de cada cliente)
+- Registrar atendimentos concluídos em uma lista de histórico
+- Cancelar atendimento e remover cliente da fila
+
+A definir em aula:
+
+- Ordenar histórico de atendimentos por data e hora
+- Buscar cliente no histórico por nome
+- Localização rápida de cliente por número de senha (tabela hash)
+
+## ETAPA 1
+Cadastrar um cliente e exibi-lo na fila de espera da interface utilizando a estrutura de fila implementada no backend.
+
+## ETAPA 3
+- Chamar próximo cliente respeitando a prioridade (preferencial à frente)
+- Exibir status da fila com a posição de cada cliente
+- Registrar atendimento concluído no histórico
+- Cancelar atendimento e remover cliente da fila

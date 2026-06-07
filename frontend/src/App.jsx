@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 export default function App() {
@@ -8,15 +8,19 @@ export default function App() {
   const [prioridade, setprioridade] = useState('Normal');
   const [proximaSenha, setProximaSenha] = useState(1);
   
+  const [buscaNomeUnico, setBuscaNomeUnico] = useState('');
+  const [resultadoNome, setResultadoNome] = useState(null);
   const [buscaNome, setBuscaNome] = useState('');
   const [buscaSenha, setBuscaSenha] = useState('');
   const [resultadoSenha, setResultadoSenha] = useState(null);
   const [ordemHistorico, setOrdemHistorico] = useState('recente');
 
-  // BUSCA DADOS DO PYTHON
+  // 🔄 BUSCA DADOS PASSANDO OS FILTROS DIRETO PARA O PYTHON
   const carregarDadosDoServidor = async () => {
     try {
-      const resposta = await fetch('http://localhost:5000/dados');
+      // Passa a busca por nome e a ordenação como parâmetros na URL (Query Params)
+      const url = `http://localhost:5000/dados?busca=${encodeURIComponent(buscaNome)}&ordem=${ordemHistorico}`;
+      const resposta = await fetch(url);
       if (!resposta.ok) throw new Error('Erro no servidor');
       const dados = await resposta.json();
       
@@ -28,10 +32,10 @@ export default function App() {
     }
   };
 
+  // 🧠 Sempre que 'buscaNome' ou 'ordemHistorico' mudarem, recarrega os dados filtrados direto do Python
   useEffect(() => {
     carregarDadosDoServidor();
-  }, []);
-
+  }, [buscaNome, ordemHistorico]);
 
   const adicionarCliente = async (e) => {
     e.preventDefault();
@@ -43,17 +47,16 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nome: nome.trim(),
-          tipo: prioridade, // Traduz 'prioridade' do front para 'tipo' do back
+          tipo: prioridade,
           chegada: new Date().toLocaleTimeString()
         })
       });
       setNome('');
       await carregarDadosDoServidor(); 
     } catch (erro) {
-      print("Erro ao cadastrar:", erro);
+      console.error("Erro ao cadastrar:", erro);
     }
   };
-
 
   const chamarProximo = async () => {
     try {
@@ -64,7 +67,6 @@ export default function App() {
     }
   };
 
-
   const cancelarAtendimento = async (id) => {
     try {
       await fetch(`http://localhost:5000/cancelar/${id}`, { method: 'POST' });
@@ -73,7 +75,6 @@ export default function App() {
       console.error(erro);
     }
   };
-
 
   const lidarBuscaSenha = async (e) => {
     e.preventDefault();
@@ -87,21 +88,23 @@ export default function App() {
     }
   };
 
-
-  const historicoFiltradoEOrdenado = useMemo(() => {
-    let resultado = historico.filter(c => 
-      c.nome.toLowerCase().includes(buscaNome.toLowerCase())
-    );
-    return resultado.sort((a, b) => {
-      return ordemHistorico === 'recente' ? 1 : -1;
-    });
-  }, [historico, buscaNome, ordemHistorico]);
+  const lidarBuscaNome = async (e) => {
+  e.preventDefault();
+  if (!buscaNomeUnico.trim()) return;
+  try {
+    const resposta = await fetch(`http://localhost:5000/buscar-nome?nome=${encodeURIComponent(buscaNomeUnico.trim())}`);
+    const dados = await resposta.json();
+    setResultadoNome(dados.encontrado ? dados.cliente : 'Nenhum cliente encontrado com este nome');
+  } catch (erro) {
+    setResultadoNome('Erro na busca por nome');
+  }
+};
 
   return (
     <div className="container-painel">
       <main className="grid-tres-colunas">
         
- 
+        {/* COLUNA 1: NOVO ATENDIMENTO E BUSCA HASH */}
         <div className="coluna-lateral">
           <section className="card">
             <h2 className="titulo-secao">👤 Novo Atendimento</h2>
@@ -159,7 +162,40 @@ export default function App() {
                   <div>
                     <p className="resultado-nome">{resultadoSenha.nome}</p>
                     <p className="resultado-status">Status: <span>{resultadoSenha.status}</span></p>
-                    <p className="resultado-prioridade">Prioridade: {resultadoSenha.tipo || resultadoSenha.prioridade}</p>
+                    <p className="resultado-prioridade">Prioridade: {resultadoSenha.prioridade || resultadoSenha.tipo}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="card card-busca-nome" style={{ marginTop: '20px' }}>
+            <h2 className="titulo-secao">🔍 Localizar por Nome</h2>
+            <p className="subtexto">Busca o status atual do cliente pelo nome completo.</p>
+            <form onSubmit={lidarBuscaNome} className="form-busca">
+              <input 
+                type="text" 
+                placeholder="Nome completo do cliente" 
+                value={buscaNomeUnico}
+                onChange={(e) => setBuscaNomeUnico(e.target.value)}
+                className="input-texto"
+              />
+              <button type="submit" className="botao-busca">Buscar</button>
+            </form>
+
+            {resultadoNome && (
+              <div className="resultado-hash">
+                {typeof resultadoNome === 'string' ? (
+                  <p className="texto-erro">{resultadoNome}</p>
+                ) : (
+                  <div>
+                    <p className="resultado-nome">{resultadoNome.nome}</p>
+                    <p className="resultado-status">
+                      Status: <span className={`status-${resultadoNome.status.toLowerCase()}`}>{resultadoNome.status}</span>
+                    </p>
+                    <p className="resultado-prioridade">Senha: <strong>#{resultadoNome.senha}</strong></p>
+                    <p className="resultado-prioridade">Prioridade: {resultadoNome.prioridade || resultadoNome.tipo}</p>
+                    {resultadoNome.conclusao && <p className="resultado-prioridade">Horário: {resultadoNome.conclusao}</p>}
                   </div>
                 )}
               </div>
@@ -167,7 +203,7 @@ export default function App() {
           </section>
         </div>
 
-        {/* COLUNA 2: FILA DE ESPERA */}
+        {/* COLUNA 2: FILA DE ESPERA (Lógica no seu Queue TAD) */}
         <div className="coluna-central">
           <header className="card header-operacional">
             <div>
@@ -211,7 +247,7 @@ export default function App() {
           </section>
         </div>
 
- 
+        {/* COLUNA 3: HISTÓRICO TRATADO PELO PYTHON */}
         <div className="coluna-lateral">
           <section className="card card-historico">
             <div className="topo-historico">
@@ -233,10 +269,10 @@ export default function App() {
             </div>
 
             <div className="lista-scroll scroll-historico">
-              {historicoFiltradoEOrdenado.length === 0 ? (
+              {historico.length === 0 ? (
                 <p className="texto-vazio">Nenhum registro encontrado.</p>
               ) : (
-                historicoFiltradoEOrdenado.map((h) => (
+                historico.map((h) => (
                   <div key={h.id} className="item-lista item-historico">
                     <div>
                       <h4 className="historico-nome">{h.nome}</h4>
