@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from classes import Queue
@@ -33,7 +35,8 @@ def cadastrar():
         "prioridade": dados['tipo'],
         "senha": proxima_senha,
         "status": "Aguardando",
-        "chegada": dados['chegada']
+        "chegada": dados['chegada'],
+        "data_hora": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     
     fila_tad.enqueue(novo_cliente)
@@ -53,10 +56,7 @@ def buscar_nome():
     cliente = fila_tad.busca_por_nome(nome_procurado)
     
     if not cliente:
-        for c in historico_lista:
-            if c['nome'].lower() == nome_procurado.lower():
-                cliente = c
-                break
+        cliente = fila_tad.busca_no_historico_por_nome(historico_lista, nome_procurado)
 
     if cliente:
         return jsonify({"encontrado": True, "cliente": cliente})
@@ -68,9 +68,9 @@ def chamar():
 
     cliente = fila_tad.dequeue()
     if cliente:
-        import datetime
         cliente['status'] = 'Concluído'
         cliente['conclusao'] = datetime.datetime.now().strftime("%H:%M:%S")
+        cliente['data_hora'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         tabela_hash_senhas[cliente['senha']] = cliente
         historico_lista.insert(0, cliente)
@@ -83,9 +83,9 @@ def cancelar(cliente_id):
  
     cliente = fila_tad.dequeue_for_id(cliente_id)
     if cliente:
-        import datetime
         cliente['status'] = 'Cancelado'
         cliente['conclusao'] = datetime.datetime.now().strftime("%H:%M:%S")
+        cliente['data_hora'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         tabela_hash_senhas[cliente['senha']] = cliente
         historico_lista.insert(0, cliente)

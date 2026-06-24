@@ -1,3 +1,6 @@
+import datetime
+
+
 class Node:
     def __init__(self, cliente):
         self.cliente = cliente
@@ -89,17 +92,71 @@ class Queue:
             pointer = pointer.next
         return lista
 
+    def obter_chave_ordem(self, cliente):
+        valor = cliente.get('data_hora') or cliente.get('dataHora') or cliente.get('chegada') or cliente.get('conclusao') or cliente.get('data')
+
+        if isinstance(valor, datetime.datetime):
+            return valor
+
+        if isinstance(valor, str):
+            texto = valor.strip()
+            if not texto:
+                return datetime.datetime.min
+
+            formatos = (
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M",
+                "%d/%m/%Y %H:%M:%S",
+                "%d/%m/%Y %H:%M",
+                "%Y-%m-%d",
+                "%d/%m/%Y",
+                "%H:%M:%S",
+                "%H:%M",
+            )
+
+            for formato in formatos:
+                try:
+                    return datetime.datetime.strptime(texto, formato)
+                except ValueError:
+                    continue
+
+            try:
+                return datetime.datetime.fromisoformat(texto)
+            except ValueError:
+                pass
+
+            if ":" in texto and len(texto) <= 5:
+                try:
+                    return datetime.datetime.strptime(f"1900-01-01 {texto}", "%Y-%m-%d %H:%M")
+                except ValueError:
+                    pass
+
+        return datetime.datetime.min
+
+    def _ordenar_historico(self, historico, ordem="recente"):
+        resultado = [cliente for cliente in historico]
+        resultado.sort(key=self.obter_chave_ordem, reverse=(ordem != "antigo"))
+        return resultado
+
     # Filtra e ordena o histórico
     def filtrar_e_ordenar_historico(self, historico, busca="", ordem="recente"):
-        busca = busca.lower()
-        resultado = historico
-        
+        busca = busca.lower().strip()
+
         if busca:
-            resultado = [c for c in historico if busca in c['nome'].lower()]
-            
+            resultado = [cliente for cliente in historico if busca in cliente.get('nome', '').lower()]
+        else:
+            resultado = [cliente for cliente in historico]
+
+        resultado = sorted(resultado, key=self.obter_chave_ordem, reverse=(ordem != "antigo"))
         if ordem == 'antigo':
-            return resultado[::-1]
+            resultado.sort(key=self.obter_chave_ordem)
         return resultado
+
+    def busca_no_historico_por_nome(self, historico, nome_procurado):
+        nome_procurado = nome_procurado.strip().lower()
+        resultado = [cliente for cliente in historico if cliente.get('nome', '').lower() == nome_procurado]
+        resultado.sort(key=self.obter_chave_ordem, reverse=True)
+        return resultado[0] if resultado else None
 
     def busca_por_nome(self, nome_procurado):
         nome_procurado = nome_procurado.strip().lower()
