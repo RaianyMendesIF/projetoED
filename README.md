@@ -95,3 +95,7 @@ Cadastrar um cliente e exibi-lo na fila de espera da interface utilizando a estr
 - Exibir status da fila com a posição de cada cliente
 - Registrar atendimento concluído no histórico
 - Cancelar atendimento e remover cliente da fila
+
+## ETAPA 4
+- Ordenar o histórico de atendimentos por data e hora
+- Buscar cliente no histórico por nome
