@@ -15,6 +15,20 @@ export default function App() {
   const [resultadoSenha, setResultadoSenha] = useState(null);
   const [ordemHistorico, setOrdemHistorico] = useState('recente');
 
+  const formatarDataHora = (valor) => {
+    if (!valor) return '';
+
+    if (typeof valor === 'string' && valor.includes(' ')) {
+      const [data, hora] = valor.split(' ');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(data) && /^\d{2}:\d{2}(:\d{2})?$/.test(hora)) {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano} ${hora}`;
+      }
+    }
+
+    return valor;
+  };
+
   // 🔄 BUSCA DADOS PASSANDO OS FILTROS DIRETO PARA O PYTHON
   const carregarDadosDoServidor = async () => {
     try {
@@ -276,7 +290,7 @@ export default function App() {
                   <div key={h.id} className="item-lista item-historico">
                     <div>
                       <h4 className="historico-nome">{h.nome}</h4>
-                      <p className="historico-detalhes">Senha {h.senha} • {h.conclusao}</p>
+                      <p className="historico-detalhes">Senha {h.senha} • {formatarDataHora(h.data_hora || h.conclusao)}</p>
                     </div>
                     <span className={`badge-status status-${(h.status || 'concluido').toLowerCase()}`}>
                       {h.status === 'Concluído' ? '✅' : '❌'} {h.status}
